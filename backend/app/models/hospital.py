@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String, Text
+from sqlalchemy import Column, Integer, String, Text, DateTime
+from sqlalchemy.sql import func
 from app.database import Base
 
 class Hospital(Base):
@@ -9,3 +10,6 @@ class Hospital(Base):
     address = Column(String(255))
     tel = Column(String(20))
     memo = Column(Text)
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
