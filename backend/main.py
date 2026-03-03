@@ -1,4 +1,9 @@
 from fastapi import FastAPI
+from app.database import engine, Base
+from app.models import hospital
+
+# テーブルがない場合作成する
+Base.metadata.create_all(bind=engine)
 
 # appインスタンスを作成（サーバ本体）
 app = FastAPI()
@@ -6,9 +11,4 @@ app = FastAPI()
 # ルートURLにアクセスしたときの処理
 @app.get("/")
 def read_root():
-    return {"message": "Hello Famicul! 準備OK!"}
-
-# 疎通確認用のテスとエンドポイント
-@app.get("/health")
-def health_check():
-    return {"status": "healthy", "database": "waiting..."}
+    return {"message": "Hospital table created!"}
