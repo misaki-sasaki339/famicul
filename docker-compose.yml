@@ -17,6 +17,7 @@ services:
   backend:
     build: ./backend
     container_name: famicul_backend
+    env_file: .env
     volumes:
       - ./backend:/app
     ports:
