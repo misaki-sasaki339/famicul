@@ -4,6 +4,8 @@ from app.database import engine, Base, get_db
 from app.models import hospital as hospital_model
 from app.models import user as user_model
 from app.schemas import user as user_schema
+from app.models import child as child_model
+from app.schemas import child as child_schema
 from app.core.security import get_password_hash
 
 # appインスタンスを作成（サーバ本体）
@@ -48,4 +50,29 @@ def register_user(user_in: user_schema.UserCreate, db: Session = Depends(get_db)
         "name": new_user.name,
         "email": new_user.email,
         "message": "User created successfully!"
+    }
+
+@app.post("/children")
+def create_child(child_in: child_schema.ChildCreate, db: Session = Depends(get_db)):
+    new_child = child_model.Child(
+        name=child_in.name,
+        gender=child_in.gender,
+        birthday=child_in.birthday,
+        weight= child_in.weight,
+        chronic_disease=child_in.chronic_disease,
+        allergy=child_in.allergy,
+        user_id=1,
+    )
+
+    db.add(new_child)
+    db.commit()
+    db.refresh(new_child)
+
+    return {
+        "name": new_child.name,
+        "gender": new_child.gender,
+        "birthday": new_child.birthday,
+        "chronic_disease": new_child.chronic_disease,
+        "allergy": new_child.allergy,
+        "message": "Child created successfully!"
     }

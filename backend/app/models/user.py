@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime
 from sqlalchemy.sql import func
 from app.database import Base
-
+from sqlalchemy.orm import relationship
 class User(Base):
     __tablename__ = "users"
 
@@ -13,3 +13,6 @@ class User(Base):
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    # リレーションの定義
+    children = relationship("Child", back_populates="user")
