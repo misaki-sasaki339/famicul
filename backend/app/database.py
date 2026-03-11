@@ -17,6 +17,8 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 # モデルのベースクラス
 Base = declarative_base()
 
+# DBセッションを取得する依存関数
+# リクエストごとにセッションを作成し、処理終了後にクローズする
 def get_db():
     db = SessionLocal()
     try:
