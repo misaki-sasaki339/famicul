@@ -1,3 +1,4 @@
+# .envファイルを読み込む
 from dotenv import load_dotenv
 import os
 
@@ -7,11 +8,13 @@ from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
-
 from alembic import context
 
 from app.database import Base
-from app.models import hospital, user, child
+from app.models.user import User
+from app.models.child import Child
+from app.models.hospital import Hospital
+from app.models.department import Department
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

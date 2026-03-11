@@ -6,6 +6,8 @@ from app.models import user as user_model
 from app.schemas import user as user_schema
 from app.models import child as child_model
 from app.schemas import child as child_schema
+from app.models import department as department_model
+from app.schemas import department as department_schema
 from app.core.security import get_password_hash
 
 # appインスタンスを作成（サーバ本体）
@@ -74,5 +76,20 @@ def create_child(child_in: child_schema.ChildCreate, db: Session = Depends(get_d
         "birthday": new_child.birthday,
         "chronic_disease": new_child.chronic_disease,
         "allergy": new_child.allergy,
+        "message": "Child created successfully!"
+    }
+
+@app.post("/department")
+def create_department(department_in: department_schema.DepartmentCreate, db: Session = Depends(get_db)):
+    new_department = department_model.Department(
+        name=department_in.name,
+    )
+
+    db.add(new_department)
+    db.commit()
+    db.refresh(new_department)
+
+    return {
+        "name": new_department.name,
         "message": "Child created successfully!"
     }
