@@ -24,4 +24,23 @@ class Visit(Base):
     department = relationship("Department", back_populates="visits")
     diseases = relationship("VisitDisease", back_populates="visit")
     hospital = relationship("Hospital", back_populates="visits")
-    #visit_images = relationship("Visit_Images", back_populates="visit")
+    visit_images = relationship("VisitImages", back_populates="visit", cascade="all, delete-orphan")
+
+class VisitImage(Base):
+    __tablename__ = "visit_images"
+    """
+    受診履歴に紐づく患部、処方箋などの画像を管理するテーブル
+    S3への保存を前提
+    """
+
+    id = Column(Integer, primary_key=True, index=True)
+    visit_id = Column(Integer, ForeignKey("visits.id"), nullable=False)
+
+    # S3上のオブジェクトキー（例： visits/1/image.jpg）
+    s3_key = Column(String(512), nullable=False)
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    # リレーションの定義
+    visit = relationship("Visit", back_populates="images")
