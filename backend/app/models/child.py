@@ -30,3 +30,4 @@ class Child(Base):
 
     # リレーションの定義
     user = relationship("User", back_populates="children")
+    visits = relationship("Visit", back_populates="child")

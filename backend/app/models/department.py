@@ -13,4 +13,4 @@ class Department(Base):
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
     # リレーションの定義
-    # visits = relationship("Visit", back_populates="department")
+    visits = relationship("Visit", back_populates="department")

@@ -1,4 +1,5 @@
 from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, ForeignKey
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.database import Base
 
@@ -22,7 +23,7 @@ class VisitDisease(Base):
     __tablename__ = "visit_diseases"
 
     id = Column(Integer, primary_key=True, index=True)
-    # visit_id = Column(Integer, ForeignKey("visits.id"), nullable=False)
+    visit_id = Column(Integer, ForeignKey("visits.id"), nullable=False)
     disease_id = Column(Integer, ForeignKey("diseases.id"), nullable=False)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -30,5 +31,5 @@ class VisitDisease(Base):
 
     # リレーションの定義
     # 特定の１つの受診履歴・病名に紐づくので単数形を使う
-    # visit = relationship("Visit", back_populates="diseases")
-    # disease = relationship("Disease", back_populates="visits")
+    visit = relationship("Visit", back_populates="diseases")
+    disease = relationship("Disease", back_populates="visits")
