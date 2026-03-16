@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.database import engine, Base, get_db
+from app.database import engine, Base
+from app.core.dependencies import get_db
 from app.models import hospital as hospital_model
 from app.models import user as user_model
 from app.schemas import user as user_schema
