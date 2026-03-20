@@ -12,8 +12,8 @@ class Disease(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
-    # リレーションの定義
-    # visits = relationship("VisitDisease", back_populates="diseases")
+    # リレーションの定義（VisitDisease.disease と back_populates で対になる）
+    visits = relationship("VisitDisease", back_populates="disease")
 
 class VisitDisease(Base):
     """
