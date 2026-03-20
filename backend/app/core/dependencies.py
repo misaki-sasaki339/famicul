@@ -15,7 +15,7 @@ def get_db():
     finally:
         db.close()
 
-oauth2_schema = OAuth2PasswordBearer(tokenUrl="login")
+oauth2_schema = OAuth2PasswordBearer(tokenUrl="auth/login")
 
 # ログインユーザーの取得
 def get_current_user(

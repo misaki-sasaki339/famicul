@@ -9,7 +9,11 @@ from app.models import child as child_model
 from app.schemas import child as child_schema
 from app.models import department as department_model
 from app.schemas import department as department_schema
+from app.models import visit as visit_model
+from app.schemas import visit as visit_schema
+from app.models import disease as disease_model
 from app.core.security import get_password_hash
+from app.routers import auth
 
 # appインスタンスを作成（サーバ本体）
 app = FastAPI()
@@ -18,6 +22,9 @@ app = FastAPI()
 @app.get("/")
 def read_root():
     return {"message": "Famicul API is running!"}
+
+# ログイン処理の読み込み
+app.include_router(auth.router, prefix="/auth", tags=["auth"])
 
 @app.post("/register")
 def register_user(user_in: user_schema.UserCreate, db: Session = Depends(get_db)):
