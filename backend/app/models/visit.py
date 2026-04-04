@@ -1,4 +1,3 @@
-from sqlite3 import Date
 from typing import Text
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, Text, Date
 from sqlalchemy.sql import func
@@ -24,7 +23,7 @@ class Visit(Base):
     department = relationship("Department", back_populates="visits")
     diseases = relationship("VisitDisease", back_populates="visit")
     hospital = relationship("Hospital", back_populates="visits")
-    visit_images = relationship("VisitImages", back_populates="visit", cascade="all, delete-orphan")
+    visit_images = relationship("VisitImage", back_populates="visit", cascade="all, delete-orphan")
 
 class VisitImage(Base):
     __tablename__ = "visit_images"
@@ -43,4 +42,4 @@ class VisitImage(Base):
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
     # リレーションの定義
-    visit = relationship("Visit", back_populates="images")
+    visit = relationship("Visit", back_populates="visit_images")

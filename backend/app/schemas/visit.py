@@ -1,6 +1,5 @@
-import datetime
 from pydantic import BaseModel
-from datetime import date
+from datetime import date, datetime
 from typing import Optional, List
 
 # --- Visit 用のスキーマ ---

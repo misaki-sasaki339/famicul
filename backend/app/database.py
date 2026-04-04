@@ -1,10 +1,11 @@
-from sqlalchemy.orm.session import Session
-
 import os
+from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm.session import Session
 from sqlalchemy.orm import sessionmaker
 
+load_dotenv()
 # .envからDATABASE_URLを取得
 SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL")
 
@@ -16,12 +17,3 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # モデルのベースクラス
 Base = declarative_base()
-
-# DBセッションを取得する依存関数
-# リクエストごとにセッションを作成し、処理終了後にクローズする
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
