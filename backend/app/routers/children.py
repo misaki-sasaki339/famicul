@@ -70,3 +70,20 @@ def update_child(
     db.refresh(child)
 
     return child
+
+# こども情報の削除
+@router.delete("/children/{id}")
+def delete_child(
+    id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    child = db.query(Child).filter(Child.id == id, Child.user_id == current_user.id).first()
+
+    if not child:
+        raise HTTPException(status_code=404, detail="Child not found")
+
+    db.delete(child)
+    db.commit()
+    # 削除が実行されるとdbからデータが消えるためdb.refresh(child)は不要
+    return {"message": "Child deleted successfully!"}
