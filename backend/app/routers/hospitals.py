@@ -26,3 +26,17 @@ def create_hospital(
     db.refresh(new_hospital)
 
     return new_hospital
+
+# 病院情報の表示
+@router.get("/hospitals/{id}", response_model=HospitalResponse)
+def get_hospital(
+    id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    hospital = db.query(Hospital).filter(Hospital.id == id, Hospital.user_id == current_user.id).first()
+
+    if not hospital:
+        raise HTTPException(status_code=404, detail="Hospital not found")
+
+    return hospital
