@@ -40,3 +40,26 @@ def get_hospital(
         raise HTTPException(status_code=404, detail="Hospital not found")
 
     return hospital
+
+# 病院情報の更新
+@router.put("/hospitals/{id}", response_model=HospitalResponse)
+def update_hospital(
+    id: int,
+    hospital_in: HospitalUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    hospital = db.query(Hospital).filter(Hospital.id == id, Hospital.user_id == current_user.id).first()
+
+    if not hospital:
+        raise HTTPException(status_code=404, detail="Hospital not found")
+
+    update_data = hospital_in.model_dump(exclude_unset=True)
+
+    for key, value in update_data.items():
+        setattr(hospital, key, value)
+
+    db.commit()
+    db.refresh(hospital)
+
+    return hospital
