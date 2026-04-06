@@ -63,3 +63,20 @@ def update_hospital(
     db.refresh(hospital)
 
     return hospital
+
+# 病院情報の削除
+@router.delete("/hospitals/{id}")
+def delete_hospital(
+    id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    hospital = db.query(Hospital).filter(Hospital.id == id, Hospital.user_id == current_user.id).first()
+
+    if not hospital:
+        raise HTTPException(status_code=404, detail="Hospital not found")
+
+    db.delete(hospital)
+    db.commit()
+    # 削除が実行されるとdbからデータが消えるためdb.refresh(hospital)は不要
+    return {"message": "Hospital deleted successfully!"}
