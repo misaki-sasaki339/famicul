@@ -2,7 +2,6 @@ from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import engine, Base
 from app.core.dependencies import get_db
-from app.models import hospital as hospital_model
 from app.models import user as user_model
 from app.schemas import user as user_schema
 from app.models import child as child_model
@@ -15,6 +14,7 @@ from app.models import disease as disease_model
 from app.core.security import get_password_hash
 from app.routers import auth
 from app.routers import children
+from app.routers import hospitals
 
 # appインスタンスを作成（サーバ本体）
 app = FastAPI()
@@ -30,6 +30,8 @@ app.include_router(auth.router, prefix="/auth", tags=["auth"])
 # /childへのアクセスの処理
 app.include_router(children.router, tags=["children"])
 
+# /hospitalへのアクセスの処理
+app.include_router(hospitals.router, tags=["hospital"])
 
 @app.post("/register")
 def register_user(user_in: user_schema.UserCreate, db: Session = Depends(get_db)):
@@ -65,19 +67,4 @@ def register_user(user_in: user_schema.UserCreate, db: Session = Depends(get_db)
         "name": new_user.name,
         "email": new_user.email,
         "message": "User created successfully!"
-    }
-
-@app.post("/department")
-def create_department(department_in: department_schema.DepartmentCreate, db: Session = Depends(get_db)):
-    new_department = department_model.Department(
-        name=department_in.name,
-    )
-
-    db.add(new_department)
-    db.commit()
-    db.refresh(new_department)
-
-    return {
-        "name": new_department.name,
-        "message": "Child created successfully!"
     }

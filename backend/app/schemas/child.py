@@ -13,7 +13,7 @@ class ChildCreate(BaseModel):
     chronic_disease: Optional[str] = None
     allergy: Optional[str] = None
 
-#こども情報更新時スキーマ
+# こども情報更新時スキーマ
 class ChildUpdate(BaseModel):
     name: Optional[str] = None
     gender: Optional[GenderEnum] = None

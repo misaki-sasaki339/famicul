@@ -16,3 +16,4 @@ class User(Base):
 
     # リレーションの定義
     children = relationship("Child", back_populates="user")
+    hospitals = relationship("Hospital", back_populates="user")
