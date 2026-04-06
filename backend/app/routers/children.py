@@ -47,7 +47,7 @@ def get_child(
 
 
 # こども情報の更新
-@router.post("/children/{id}", response_model=ChildResponse)
+@router.put("/children/{id}", response_model=ChildResponse)
 def update_child(
     id: int,
     child_in: ChildUpdate,
@@ -59,13 +59,10 @@ def update_child(
     if not child:
         raise HTTPException(status_code=404, detail="Child not found")
 
-    child.name = child_in.name
-    child.gender = child_in.gender
-    child.birthday = child_in.birthday
-    child.weight = child_in.weight
-    child.chronic_disease = child_in.chronic_disease
-    child.allergy = child_in.allergy
+    update_data = child_in.model_dump(exclude_unset=True)
 
+    for key, value in update_data.items():
+        setattr(child, key, value)
     db.commit()
     db.refresh(child)
 
