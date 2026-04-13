@@ -1,10 +1,15 @@
-from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, ForeignKey
+from sqlalchemy import Column, ForeignKey, Integer, String, DateTime
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.database import Base
 
 class Disease(Base):
+    """
+    病名マスタテーブル
+    ユーザーが入力した病名が自動登録される（動的追加）
+    """
     __tablename__ = "diseases"
+
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(255), unique=True, nullable=False, index=True)
@@ -12,8 +17,8 @@ class Disease(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
-    # リレーションの定義（VisitDisease.disease と back_populates で対になる）
-    visits = relationship("VisitDisease", back_populates="disease")
+    # リレーションの定義
+    visit_links = relationship("VisitDisease", back_populates="disease")
 
 class VisitDisease(Base):
     """
@@ -31,5 +36,5 @@ class VisitDisease(Base):
 
     # リレーションの定義
     # 特定の１つの受診履歴・病名に紐づくので単数形を使う
-    visit = relationship("Visit", back_populates="diseases")
-    disease = relationship("Disease", back_populates="visits")
+    visit = relationship("Visit", back_populates="disease_links")
+    disease = relationship("Disease", back_populates="visit_links")

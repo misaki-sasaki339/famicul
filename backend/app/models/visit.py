@@ -21,7 +21,7 @@ class Visit(Base):
     # リレーションの定義
     child = relationship("Child", back_populates="visits")
     department = relationship("Department", back_populates="visits")
-    diseases = relationship("VisitDisease", back_populates="visit")
+    disease_links = relationship("VisitDisease", back_populates="visit")
     hospital = relationship("Hospital", back_populates="visits")
     visit_images = relationship("VisitImage", back_populates="visit", cascade="all, delete-orphan")
 
