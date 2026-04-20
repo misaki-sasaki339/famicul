@@ -30,3 +30,17 @@ def create_visit(
     # disease_namesは後で処理
 
     return new_visit
+
+# 受診記録の表示
+@router.get("/children/{child_id}/visits/{id}", response_model=VisitResponse)
+def get_visit(
+    child_id: int,
+    id: int,
+    db: Session = Depends(get_db),
+):
+    visit = db.query(Visit).filter(Visit.id == id, Visit.child_id == child_id).first()
+
+    if not visit:
+        raise HTTPException(status_code=404, detail="Visit not found")
+
+    return visit
