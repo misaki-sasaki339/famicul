@@ -15,6 +15,7 @@ from app.core.security import get_password_hash
 from app.routers import auth
 from app.routers import children
 from app.routers import hospitals
+from app.routers import visits
 
 # appインスタンスを作成（サーバ本体）
 app = FastAPI()
@@ -32,6 +33,9 @@ app.include_router(children.router, tags=["children"])
 
 # /hospitalへのアクセスの処理
 app.include_router(hospitals.router, tags=["hospital"])
+
+# /visitsへのアクセスの処理
+app.include_router(visits.router, tags=["visit"])
 
 @app.post("/register")
 def register_user(user_in: user_schema.UserCreate, db: Session = Depends(get_db)):
