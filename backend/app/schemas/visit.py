@@ -47,3 +47,7 @@ class VisitUpdate(BaseModel):
     next_visit_at: Optional[datetime] = None
     is_emergency: Optional[bool] = None
     disease_names: Optional[List[str]] = None
+
+class VisitKey(BaseModel):
+    child_id: int
+    visit_id: int
