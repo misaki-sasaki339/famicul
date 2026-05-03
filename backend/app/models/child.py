@@ -24,6 +24,7 @@ class Child(Base):
     #既往歴、アレルギー情報は記述が増えることも想定してText型
     chronic_disease = Column(Text, nullable=True)
     allergy = Column(Text, nullable=True)
+    memo = Column(Text, nullable=True)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())

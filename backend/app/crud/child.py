@@ -26,7 +26,7 @@ def create_child(
         weight = child_in.weight,
         chronic_disease = child_in.chronic_disease,
         allergy = child_in.allergy,
-        # memo = child_in.memo,
+        memo = child_in.memo,
         user_id = user_id
     )
     db.add(new_child)

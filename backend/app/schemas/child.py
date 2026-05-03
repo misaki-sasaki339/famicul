@@ -1,6 +1,5 @@
 from datetime import date
 from typing import Optional
-from fastapi.openapi.models import Operation
 from pydantic import BaseModel
 from app.models.child import GenderEnum
 
@@ -12,6 +11,7 @@ class ChildCreate(BaseModel):
     weight: Optional[float] = None
     chronic_disease: Optional[str] = None
     allergy: Optional[str] = None
+    memo: Optional[str] = None
 
 # こども情報更新時スキーマ
 class ChildUpdate(BaseModel):
@@ -21,6 +21,7 @@ class ChildUpdate(BaseModel):
     weight: Optional[float] = None
     chronic_disease: Optional[str] = None
     allergy: Optional[str] = None
+    memo: Optional[str] = None
 
 # レスポンス用スキーマ
 class ChildResponse(BaseModel):
@@ -31,6 +32,7 @@ class ChildResponse(BaseModel):
     weight: Optional[float] = None
     chronic_disease: Optional[str] = None
     allergy: Optional[str] = None
+    memo: Optional[str] = None
 
     class Config:
         from_attributes = True
