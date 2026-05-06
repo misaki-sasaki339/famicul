@@ -3,7 +3,15 @@ from sqlalchemy.orm import Session
 from app.models import Visit
 from app.crud import visit as visit_crud
 from app.schemas.visit import VisitCreate, VisitKey, VisitUpdate, VisitResponse
+from app.models.child import Child
 
+# こどもIDが存在するか確認するヘルパー関数
+def _get_child_or_404(db: Session, child_id: int):
+    child = db.query(Child).filter(Child.id == child_id).first()
+    if not child:
+        raise HTTPException(status_code=404, detail="Child not found")
+
+# 受診記録が存在するか確認するヘルパー関数
 def _get_visit_or_404(
     db: Session,
     key: VisitKey
@@ -31,6 +39,7 @@ def list_visits_service(
     db: Session,
     child_id: int
 ):
+    _get_child_or_404(db, child_id)
     # DBからVisitの一覧を取得する
     visits = visit_crud.list_visits_by_child_id_with_diseases(db, child_id)
     # それぞれVisitResponseに変換して返す
@@ -42,6 +51,7 @@ def create_visit_service(
     child_id: int,
     visit_in: VisitCreate
 ):
+    _get_child_or_404(db, child_id)
     # DB保存処理をcrudへ委譲
     return to_visit_response(visit_crud.create_visit(db, child_id, visit_in))
 
