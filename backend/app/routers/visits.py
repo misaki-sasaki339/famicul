@@ -16,6 +16,15 @@ def create_visit(
     # serviceの処理を委譲し結果だけを返す
     return visit_service.create_visit_service(db, child_id, visit_in)
 
+# こどもごとの受診記録の全件表示
+@router.get("/children/{child_id}/visits", response_model=list[VisitResponse])
+def list_visits(
+    child_id: int,
+    db: Session = Depends(get_db)
+):
+    # serviceに処理を委譲して結果だけ返す
+    return visit_service.list_visits_service(db, child_id)
+
 # 受診記録の表示
 @router.get("/children/{child_id}/visits/{id}", response_model=VisitResponse)
 def get_visit(
@@ -26,7 +35,7 @@ def get_visit(
     # pathのchild_idとvisit_idをVisitKeyにまとめる
     key = VisitKey(child_id=child_id, visit_id=id)
 
-    # serviceに処理を委縮して結果だけを返す
+    # serviceに処理を委譲して結果だけを返す
     return visit_service.get_visit_service(db, key)
 
 # 受診記録の更新

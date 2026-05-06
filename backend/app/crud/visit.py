@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload, joinedload
 from app.models import Visit
 from app.models.disease import Disease, VisitDisease
 from app.schemas.visit import VisitCreate, VisitUpdate
@@ -47,13 +47,32 @@ def _replace_visit_diseases(
             disease_id=disease.id
         ))
 
+# こどもIDに紐づく受診記録を全件取得
+def list_visits_by_child_id_with_diseases(
+    db: Session,
+    child_id: int
+) -> list[Visit]:
+    # Visitテーブルからchild_idが一致するものを受診日降順で表示
+    return (
+        db.query(Visit)
+        .filter(Visit.child_id == child_id)
+        .options(selectinload(Visit.disease_links).selectinload(VisitDisease.disease))
+        .order_by(Visit.visit_date.desc())
+        .all()
+    )
+
 # こどもIDと受診記録IDから受診記録を取得
-def get_visit_by_id_and_child_id(
+def get_visit_by_id_and_child_id_with_disease(
     db: Session,
     child_id: int,
     visit_id: int
 ):
-    return db.query(Visit).filter(Visit.id == visit_id, Visit.child_id == child_id).first()
+    return (
+        db.query(Visit)
+        .filter(Visit.id == visit_id, Visit.child_id == child_id)
+        .options(joinedload(Visit.disease_links).joinedload(VisitDisease.disease))
+        .first()
+    )
 
 # 受診記録の新規作成
 def create_visit(
