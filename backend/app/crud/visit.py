@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session, selectinload, joinedload
-from app.models import Visit
+from app.models import Visit, Child
 from app.models.disease import Disease, VisitDisease
 from app.schemas.visit import VisitCreate, VisitUpdate
 
@@ -50,12 +50,14 @@ def _replace_visit_diseases(
 # こどもIDに紐づく受診記録を全件取得
 def list_visits_by_child_id_with_diseases(
     db: Session,
-    child_id: int
+    child_id: int,
+    user_id: int
 ) -> list[Visit]:
     # Visitテーブルからchild_idが一致するものを受診日降順で表示
     return (
         db.query(Visit)
-        .filter(Visit.child_id == child_id)
+        .join(Child)
+        .filter(Visit.child_id == child_id, Child.user_id == user_id)
         .options(selectinload(Visit.disease_links).selectinload(VisitDisease.disease))
         .order_by(Visit.visit_date.desc())
         .all()
@@ -65,11 +67,13 @@ def list_visits_by_child_id_with_diseases(
 def get_visit_by_id_and_child_id_with_disease(
     db: Session,
     child_id: int,
-    visit_id: int
+    visit_id: int,
+    user_id: int
 ):
     return (
         db.query(Visit)
-        .filter(Visit.id == visit_id, Visit.child_id == child_id)
+        .join(Child)
+        .filter(Visit.id == visit_id, Visit.child_id == child_id, Child.user_id == user_id)
         .options(joinedload(Visit.disease_links).joinedload(VisitDisease.disease))
         .first()
     )
@@ -78,7 +82,7 @@ def get_visit_by_id_and_child_id_with_disease(
 def create_visit(
     db: Session,
     child_id: int,
-    visit_in: VisitCreate
+    visit_in: VisitCreate,
 ):
     # 入力データから受診記録モデルを作成して保存する
     new_visit = Visit(
@@ -89,7 +93,7 @@ def create_visit(
         symptom = visit_in.symptom,
         advice = visit_in.advice,
         next_visit_at = visit_in.next_visit_at,
-        is_emergency = visit_in.is_emergency
+        is_emergency = visit_in.is_emergency,
     )
     db.add(new_visit)
 
@@ -108,7 +112,7 @@ def create_visit(
 def update_visit(
     db: Session,
     visit: Visit,
-    visit_in: VisitUpdate
+    visit_in: VisitUpdate,
 ):
     update_data = visit_in.model_dump(exclude_unset=True)
 
