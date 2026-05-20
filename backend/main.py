@@ -38,7 +38,7 @@ app.include_router(hospitals.router, tags=["hospital"])
 # /visitsへのアクセスの処理
 app.include_router(visits.router, tags=["visit"])
 
-# /visits/{visit_id}/imagesへのアクセス処理
+# /children/{child_id}/visits/{id}/imagesへのアクセス処理
 app.include_router(visit_image.router, tags=["visit-images"])
 
 @app.post("/register")
