@@ -3,13 +3,26 @@ from sqlalchemy.orm import Session
 from app.models import Visit
 from app.crud import visit as visit_crud
 from app.schemas.visit import VisitCreate, VisitKey, VisitUpdate, VisitResponse
+from app.crud import child as child_crud
 
+# こどもIDが存在するか確認するヘルパー関数
+def _get_child_or_404(
+    db: Session,
+    child_id: int,
+    user_id: int
+):
+    child = child_crud.get_child_by_id_and_user_id(db, child_id, user_id)
+    if not child:
+        raise HTTPException(status_code=404, detail="Child not found")
+
+# 受診記録が存在するか確認するヘルパー関数
 def _get_visit_or_404(
     db: Session,
-    key: VisitKey
+    key: VisitKey,
+    user_id: int
 ):
     # DBから対象のこどもの受診記録を取得する
-    visit = visit_crud.get_visit_by_id_and_child_id_with_disease(db, key.child_id, key.visit_id)
+    visit = visit_crud.get_visit_by_id_and_child_id_with_disease(db, key.child_id, key.visit_id, user_id)
 
     # 見つからない場合は404を返す
     if not visit:
@@ -21,18 +34,21 @@ def _get_visit_or_404(
 # 受診記録の取得処理
 def get_visit_service(
     db: Session,
-    key: VisitKey
+    key: VisitKey,
+    user_id: int
 ):
     # 共通関数を使って取得
-    return to_visit_response(_get_visit_or_404(db, key))
+    return to_visit_response(_get_visit_or_404(db, key, user_id))
 
 # こどもごとの受診記録全件取得処理
 def list_visits_service(
     db: Session,
-    child_id: int
+    child_id: int,
+    user_id: int
 ):
+    _get_child_or_404(db, child_id, user_id)
     # DBからVisitの一覧を取得する
-    visits = visit_crud.list_visits_by_child_id_with_diseases(db, child_id)
+    visits = visit_crud.list_visits_by_child_id_with_diseases(db, child_id, user_id)
     # それぞれVisitResponseに変換して返す
     return [to_visit_response(v) for v in visits]
 
@@ -40,8 +56,10 @@ def list_visits_service(
 def create_visit_service(
     db: Session,
     child_id: int,
-    visit_in: VisitCreate
+    visit_in: VisitCreate,
+    user_id: int
 ):
+    _get_child_or_404(db, child_id, user_id)
     # DB保存処理をcrudへ委譲
     return to_visit_response(visit_crud.create_visit(db, child_id, visit_in))
 
@@ -49,10 +67,11 @@ def create_visit_service(
 def update_visit_service(
     db: Session,
     key: VisitKey,
-    visit_in: VisitUpdate
+    visit_in: VisitUpdate,
+    user_id: int
 ):
     # DBから対象のこどもの受診記録を探す
-    visit = _get_visit_or_404(db, key)
+    visit = _get_visit_or_404(db, key, user_id)
 
     # DB保存処理をcrudへ委譲
     updated = visit_crud.update_visit(db, visit, visit_in)
@@ -61,10 +80,11 @@ def update_visit_service(
 # 情報削除処理
 def delete_visit_service(
     db: Session,
-    key: VisitKey
+    key: VisitKey,
+    user_id: int
 ):
     # DBから対象のこどもの受診記録を探す
-    visit = _get_visit_or_404(db, key)
+    visit = _get_visit_or_404(db, key, user_id)
     
     # DB削除処理をcrudに委譲
     visit_crud.delete_visit(db, visit)

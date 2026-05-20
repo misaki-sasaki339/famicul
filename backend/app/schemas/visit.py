@@ -5,7 +5,6 @@ from typing import Optional, List
 # --- Visit 用のスキーマ ---
 # 受診履歴登録時のスキーマ
 class VisitCreate(BaseModel):
-    child_id: int
     hospital_id: int
     department_id: int
     visit_date: date
