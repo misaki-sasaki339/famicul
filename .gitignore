@@ -12,3 +12,4 @@ db/data/
 
 .env
 .cursorrules
+backend/uploads

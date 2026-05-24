@@ -46,11 +46,6 @@ class VisitKey(BaseModel):
     visit_id: int
 
 # --- VisitImage 用のスキーマ ---
-# 受診履歴に紐づく画像データ登録時のスキーマ
-class VisitImageCreate(BaseModel):
-    visit_id: int
-    s3_key: str
-
 # レスポンス用スキーマ
 class VisitImageResponse(BaseModel):
     id: int

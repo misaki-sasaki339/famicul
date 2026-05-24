@@ -1,8 +1,9 @@
-from fastapi import HTTPException
+from fastapi import HTTPException, UploadFile
 from sqlalchemy.orm import Session
 from app.crud import visit_image as visit_image_crud
-from app.schemas.visit import VisitImageCreate, VisitKey
+from app.schemas.visit import VisitKey
 from app.services.visit_service import _get_visit_or_404
+from app.core.local_storage import save_visit_image_file, resolve_storage_path, delete_storage_file
 
 # 画像１件を取得し、なければ404を返す
 def _get_visit_image_or_404(
@@ -24,20 +25,32 @@ def _get_visit_image_or_404(
     # 見つかった画像を返す
     return visit_image
 
+# 画像ファイル本体を返す
+def get_visit_image_file_service(
+    db: Session,
+    key: VisitKey,
+    image_id: int,
+    user_id: int
+):
+    # その画像が自分のvisitのものかを確認
+    visit_image = _get_visit_image_or_404(db, key, image_id, user_id)
+
+    # s3_keyからローカルファイルの場所を調べる
+    return resolve_storage_path(visit_image.s3_key)
+
 # 画像作成処理
 def create_visit_image_service(
     db: Session,
     key: VisitKey,
-    visit_image_in: VisitImageCreate,
-    user_id: int
+    file: UploadFile,
+    user_id: int,
 ):
+    # 自分のvisitか確認
     _get_visit_or_404(db, key, user_id)
-    # pathのvisit_idとbodyのvisit_idがずれていないか確認
-    if visit_image_in.visit_id != key.visit_id:
-        raise HTTPException(status_code=400, detail="visit_id mismatch")
-
+    # ローカルに保存し相対パス取得
+    storage_key = save_visit_image_file(key.visit_id, file)
     # CRUDへ保存処理を委譲する
-    return visit_image_crud.create_visit_image(db, visit_image_in)
+    return visit_image_crud.create_visit_image(db, key.visit_id, storage_key)
 
 # 画像一覧取得処理
 def get_visit_images_service(
@@ -46,7 +59,7 @@ def get_visit_images_service(
     user_id: int
 ):
     _get_visit_or_404(db, key, user_id)
-    # CRUDヘ取得処理を委譲する
+    # CRUDへ取得処理を委譲する
     return visit_image_crud.get_visit_images_by_visit_id(db, key.visit_id)
 
 # 画像削除処理
@@ -58,7 +71,7 @@ def delete_visit_image_service(
 ):
     # 対象画像を取得する（なければ404）
     visit_image = _get_visit_image_or_404(db, key, image_id, user_id)
-
+    delete_storage_file(visit_image.s3_key)
     # CRUDへ処理を委譲する
     visit_image_crud.delete_visit_image(db, visit_image)
 
