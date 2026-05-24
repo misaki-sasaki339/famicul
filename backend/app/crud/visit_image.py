@@ -1,16 +1,16 @@
 from sqlalchemy.orm import Session
 from app.models.visit import VisitImage
-from app.schemas.visit import VisitImageCreate
 
 # 受診IDに紐づく画像を新規作成する
 def create_visit_image(
     db: Session,
-    visit_image_in: VisitImageCreate
+    visit_id: int,
+    storage_key: str
 ) -> VisitImage:
-    # 入力データからVisitImageモデルを生成する
+    # ローカル保存したパスをDBに保存
     new_visit_image = VisitImage(
-        visit_id=visit_image_in.visit_id,
-        s3_key=visit_image_in.s3_key
+        visit_id=visit_id,
+        s3_key=storage_key
     )
 
     # DBに追加して保存
