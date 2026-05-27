@@ -1,5 +1,5 @@
 from typing import Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 # 病院登録時スキーマ
 class HospitalCreate(BaseModel):
@@ -22,6 +22,4 @@ class HospitalResponse(BaseModel):
     address: Optional[str] = None
     tel: Optional[str] = None
     memo: Optional[str] = None
-
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

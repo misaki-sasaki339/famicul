@@ -1,6 +1,6 @@
 from datetime import date
 from typing import Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from app.models.child import GenderEnum
 
 # こども情報登録時スキーマ
@@ -33,6 +33,4 @@ class ChildResponse(BaseModel):
     chronic_disease: Optional[str] = None
     allergy: Optional[str] = None
     memo: Optional[str] = None
-
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
