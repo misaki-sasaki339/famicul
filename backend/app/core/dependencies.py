@@ -3,8 +3,8 @@ from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from jose import jwt
-from app.models.user import User
 from app.core.auth import SECRET_KEY, ALGORITHM
+from app.crud import user as user_crud
 
 # DBセッションを取得する依存関数
 # リクエストごとにセッションを作成し、処理終了後にクローズする
@@ -29,8 +29,7 @@ def get_current_user(
     except:
         raise HTTPException(status_code=401)
 
-    # user_idに一致するUser.idをDB検索
-    user = db.query(User).filter(User.id == user_id).first()
+    user = user_crud.get_user_by_id(db, user_id)
 
     if not user:
         raise HTTPException(status_code=401)

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from datetime import date, datetime
 from typing import Optional, List
 
@@ -27,10 +27,8 @@ class VisitResponse(BaseModel):
     next_visit_at: Optional[datetime] = None
     is_emergency: bool = False
     disease_names: List[str] = Field(default_factory=list)
-
-    class Config:
-        from_attributes = True
-
+    model_config = ConfigDict(from_attributes=True)
+    
 class VisitUpdate(BaseModel):
     hospital_id: Optional[int] = None
     department_id: Optional[int] = None
@@ -51,6 +49,4 @@ class VisitImageResponse(BaseModel):
     id: int
     visit_id: int
     s3_key: str
-
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
