@@ -19,8 +19,8 @@ class Child(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
     name = Column(String(255), nullable=False)
     gender = Column(Enum(GenderEnum), nullable=True)
-    birthday = Column(Date)
-    weight = Column(Float)
+    birthday = Column(Date, nullable=False)
+    weight = Column(Float, nullable=True)
     #既往歴、アレルギー情報は記述が増えることも想定してText型
     chronic_disease = Column(Text, nullable=True)
     allergy = Column(Text, nullable=True)
