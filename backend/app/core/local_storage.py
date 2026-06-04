@@ -5,12 +5,24 @@ from fastapi import HTTPException, UploadFile
 
 # 保存先ルート(画像ファイルから3つ上のbackend/uploadsを指定、.resolve()を呼んで絶対パスに変換)
 UPLOAD_ROOT = Path(__file__).resolve().parent.parent.parent / "uploads"
+RESOLVED_UPLOAD_ROOT = UPLOAD_ROOT.resolve()
 
 # 許可する画像形式(Content-Type → 拡張子)
 ALLOWED_CONTENT_TYPES = {
     "image/jpeg": ".jpg",
     "image/png": ".png"
 }
+
+# 画像ファイルがuploadsディレクトリ以下にある安全な場所かをチェックする関数
+def _is_under_upload_root(absolute_path: Path) -> bool:
+    return RESOLVED_UPLOAD_ROOT in absolute_path.parents
+
+# アップロードディレクトリのパスチェック関数
+def _resolve_path_under_upload_root(relative_path: str | Path) -> Path:
+    absolute_path = (UPLOAD_ROOT / relative_path).resolve()
+    if not _is_under_upload_root(absolute_path):
+        raise HTTPException(status_code=400, detail="Invalid storage path")
+    return absolute_path
 
 # 拡張子を決める関数
 def _extension_for(file: UploadFile) -> str:
@@ -40,13 +52,7 @@ def save_visit_image_file(visit_id: int, file: UploadFile) -> str:
 
 # 画像ファイルのパス解決(GET用)
 def resolve_storage_path(storage_key: str) -> Path:
-    #UPLOAD_ROOT + storage_keyでフルパスをつくる
-    absolute_path = (UPLOAD_ROOT / storage_key).resolve()
-    upload_root = UPLOAD_ROOT.resolve()
-
-    # uploadsフォルダの外を参照したら拒否（セキュリティ）
-    if upload_root not in absolute_path.parents:
-        raise HTTPException(status_code=400, detail="Invalid storage path")
+    absolute_path = _resolve_path_under_upload_root(storage_key)
 
     # ファイルがなければ404
     if not absolute_path.is_file():
@@ -54,15 +60,23 @@ def resolve_storage_path(storage_key: str) -> Path:
 
     return absolute_path
 
-
 # 画像ファイルの削除(DELETE用)
 def delete_storage_file(storage_key: str) -> None:
     file_path = (UPLOAD_ROOT / storage_key).resolve()
-    upload_root = UPLOAD_ROOT.resolve()
 
     # 不正なパスの場合は画像ファイルを削除しない
-    if upload_root not in file_path.parents:
+    if not _is_under_upload_root(file_path):
         return
 
     if file_path.is_file():
         file_path.unlink()
+
+# 画像ファイルのディレクトリを削除
+def delete_visit_upload_dir(visit_id: int) -> None:
+    visit_dir = (UPLOAD_ROOT / "visits" / str(visit_id)).resolve()
+
+    if not _is_under_upload_root(visit_dir):
+        return
+
+    if visit_dir.is_dir():
+        shutil.rmtree(visit_dir)

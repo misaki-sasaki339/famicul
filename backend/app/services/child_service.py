@@ -1,7 +1,9 @@
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from app.crud import child as child_crud
+from app.crud import visit as visit_crud
 from app.schemas.child import ChildCreate, ChildUpdate
+from app.core.local_storage import delete_storage_file, delete_visit_upload_dir
 
 def _get_child_or_404(
     db: Session,
@@ -62,9 +64,27 @@ def delete_child_service(
     child_id: int,
     user_id: int
 ):
-    # DBから対象のユーザーのこどもを探す
+    # ①DBから対象のユーザーのこどもを探す
     child = _get_child_or_404(db, child_id, user_id)
+
+    # ②紐づく受診・画像レコードを削除（commitはしない）
+    storage_keys, visit_ids = visit_crud.delete_all_for_child(
+        db,
+        child.id
+    )
     
-    # DB削除処理をcrudに委譲
-    child_crud.delete_child(db, child)
-    return {"message": "Child deleted successfully!"}
+    # ③こども本体を削除（commitはしない）
+    child_crud.delete_child(db, child, commit=False)
+
+    # ④DBを確定
+    db.commit()
+
+    # ⑤ローカルのファイルを削除
+    for storage_key in storage_keys:
+        delete_storage_file(storage_key)
+
+    # ⑥受診ごとの保存フォルダを削除
+    for visit_id in visit_ids:
+        delete_visit_upload_dir(visit_id)
+
+    return {"message": "Child and related records deleted successfully!"}
