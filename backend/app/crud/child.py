@@ -67,8 +67,11 @@ def update_child(
 # こども情報の削除
 def delete_child(
     db: Session,
-    child: Child
+    child: Child,
+    *,
+    commit: bool = True
 ) -> None:
     db.delete(child)
-    db.commit()
+    if commit:
+        db.commit()
     # 削除が実行されるとdbから削除されるためrefresh(child)は不要

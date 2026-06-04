@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session, selectinload, joinedload
-from app.models import Visit, Child
+from app.models import Visit, Child, VisitImage
 from app.models.disease import Disease, VisitDisease
 from app.schemas.visit import VisitCreate, VisitUpdate
 
@@ -139,3 +139,40 @@ def delete_visit(
     db.delete(visit)
     db.commit()
     # 削除が実行されるとdbから削除されるためrefresh(visit)は不要
+
+# こどもに紐づく受診記録をすべて削除する
+def delete_all_for_child(
+    db: Session,
+    child_id: int
+) -> tuple[list[str], list[int]]:
+    # 削除対象の受診記録を取得
+    visits = db.query(Visit).filter(Visit.child_id == child_id).all()
+
+    storage_keys: list[str] = []
+    visit_ids: list[int] = []
+
+    for visit in visits:
+        visit_ids.append(visit.id)
+
+        # 画像ファイル削除用にstorage_keyを控える
+        visit_images = (
+            db.query(VisitImage)
+            .filter(VisitImage.visit_id == visit.id)
+            .all()
+        )
+        storage_keys.extend(image.s3_key for image in visit_images)
+
+        # 病名の中間テーブルを削除
+        db.query(VisitDisease).filter(
+            VisitDisease.visit_id == visit.id
+        ).delete(synchronize_session=False)
+
+        # 画像レコードを削除
+        db.query(VisitImage).filter(
+            VisitImage.visit_id == visit.id
+        ).delete(synchronize_session=False)
+
+        # 受診記録本体を削除
+        db.delete(visit)
+
+    return storage_keys, visit_ids
