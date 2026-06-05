@@ -2,6 +2,7 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from app.crud import hospital as hospital_crud
 from app.schemas.hospital import HospitalCreate, HospitalUpdate
+from app.crud import visit as visit_crud
 
 def _get_hospital_or_404(
     db: Session,
@@ -64,6 +65,13 @@ def delete_hospital_service(
 ):
     # DBから対象のユーザーの病院を探す
     hospital = _get_hospital_or_404(db, hospital_id, user_id)
+
+    # 受診記録の件数を調べる
+    visit_count = visit_crud.count_visits_by_hospital_id(db, hospital_id)
+
+    # 1件以上あれば削除不可
+    if visit_count > 0:
+        raise HTTPException(status_code=409, detail="Cannot delete hospital with existing visit records")
     
     # DB削除処理をcrudに委譲
     hospital_crud.delete_hospital(db, hospital)

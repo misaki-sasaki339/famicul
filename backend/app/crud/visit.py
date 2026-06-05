@@ -140,6 +140,17 @@ def delete_visit(
     db.commit()
     # 削除が実行されるとdbから削除されるためrefresh(visit)は不要
 
+# 病院IDに紐づく受診記録の件数を取得する
+def count_visits_by_hospital_id(
+    db: Session,
+    hospital_id: int
+) -> int:
+    return (
+        db.query(Visit)
+        .filter(Visit.hospital_id == hospital_id)
+        .count()
+    )
+
 # こどもに紐づく受診記録をすべて削除する
 def delete_all_for_child(
     db: Session,
