@@ -13,3 +13,8 @@ class UserCreate(UserBase):
 class UserResponse(UserBase):
     id: int
     model_config = ConfigDict(from_attributes=True)
+
+# トークンレスポンス用スキーマ
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str
