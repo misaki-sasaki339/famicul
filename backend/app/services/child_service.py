@@ -86,5 +86,3 @@ def delete_child_service(
     # ⑥受診ごとの保存フォルダを削除
     for visit_id in visit_ids:
         delete_visit_upload_dir(visit_id)
-
-    return {"message": "Child and related records deleted successfully!"}
