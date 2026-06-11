@@ -75,4 +75,3 @@ def delete_hospital_service(
     
     # DB削除処理をcrudに委譲
     hospital_crud.delete_hospital(db, hospital)
-    return {"message": "Hospital deleted successfully!"}
