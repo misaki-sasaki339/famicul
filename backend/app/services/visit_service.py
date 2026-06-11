@@ -88,7 +88,6 @@ def delete_visit_service(
     
     # DB削除処理をcrudに委譲
     visit_crud.delete_visit(db, visit)
-    return {"message": "Visit deleted successfully!"}
 
 # visitからdisease_namesをつくる関数
 def build_disease_names(visit: Visit) -> list[str]:
