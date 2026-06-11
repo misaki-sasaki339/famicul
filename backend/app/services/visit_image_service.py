@@ -74,5 +74,3 @@ def delete_visit_image_service(
     delete_storage_file(visit_image.s3_key)
     # CRUDへ処理を委譲する
     visit_image_crud.delete_visit_image(db, visit_image)
-
-    return {"message": "VisitImage deleted successfully!"}
