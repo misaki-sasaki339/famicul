@@ -2,6 +2,7 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from app.models import Visit
 from app.crud import visit as visit_crud
+from app.crud import hospital as hospital_crud
 from app.schemas.visit import VisitCreate, VisitKey, VisitUpdate, VisitResponse
 from app.crud import child as child_crud
 
@@ -15,6 +16,21 @@ def _get_child_or_404(
     if not child:
         raise HTTPException(status_code=404, detail="Child not found")
 
+# 病院IDが自分のものかを確認するヘルパー関数
+def _get_hospital_or_404(
+    db: Session,
+    hospital_id: int,
+    user_id: int
+):
+    # DBから対象ユーザーの病院を1件取得
+    hospital = hospital_crud.get_hospital_by_id_and_user_id(db, hospital_id, user_id)
+
+    # 見つからない場合は404を返す
+    if not hospital:
+        raise HTTPException(status_code=404, detail="Hospital not found")
+
+    return hospital
+    
 # 受診記録が存在するか確認するヘルパー関数
 def _get_visit_or_404(
     db: Session,
@@ -60,6 +76,7 @@ def create_visit_service(
     user_id: int
 ):
     _get_child_or_404(db, child_id, user_id)
+    _get_hospital_or_404(db, visit_in.hospital_id, user_id)
     # DB保存処理をcrudへ委譲
     return to_visit_response(visit_crud.create_visit(db, child_id, visit_in))
 
@@ -72,6 +89,10 @@ def update_visit_service(
 ):
     # DBから対象のこどもの受診記録を探す
     visit = _get_visit_or_404(db, key, user_id)
+
+    # hospital_idの整合性チェック
+    if visit_in.hospital_id is not None:
+        _get_hospital_or_404(db, visit_in.hospital_id, user_id)
 
     # DB保存処理をcrudへ委譲
     updated = visit_crud.update_visit(db, visit, visit_in)
