@@ -131,14 +131,39 @@ def update_visit(
 
     return visit
 
-# 受診記録の削除
+# 受診記録1件を削除する（画像などの関連データ含む）
+# 戻り値：　ローカル削除用のstorage_key一覧
 def delete_visit(
     db: Session,
-    visit: Visit
-) -> None:
+    visit: Visit,
+    *,
+    commit: bool = True,
+) -> list[str]:
+    # ①画像ファイル削除用にstorage_keyを控える
+    visit_images = (
+        db.query(VisitImage)
+        .filter(VisitImage.visit_id == visit.id)
+        .all()
+    )
+    storage_keys = [image.s3_key for image in visit_images]
+
+    # ②病名の中間テーブルを削除
+    db.query(VisitDisease).filter(
+        VisitDisease.visit_id == visit.id
+    ).delete(synchronize_session=False)
+
+    # ③画像レコードを削除
+    db.query(VisitImage).filter(
+        VisitImage.visit_id == visit.id
+    ).delete(synchronize_session=False)
+
+    # ④受診記録本体の削除
     db.delete(visit)
-    db.commit()
-    # 削除が実行されるとdbから削除されるためrefresh(visit)は不要
+    
+    if commit:
+        db.commit()
+
+    return storage_keys
 
 # 病院IDに紐づく受診記録の件数を取得する
 def count_visits_by_hospital_id(
