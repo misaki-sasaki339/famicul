@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from app.models import Visit
 from app.crud import visit as visit_crud
 from app.crud import hospital as hospital_crud
+from app.crud import department as department_crud
 from app.schemas.visit import VisitCreate, VisitKey, VisitUpdate, VisitResponse
 from app.crud import child as child_crud
 
@@ -30,6 +31,18 @@ def _get_hospital_or_404(
         raise HTTPException(status_code=404, detail="Hospital not found")
 
     return hospital
+
+# 受診科IDが存在するかのヘルパー関数
+def _get_department_or_404(
+    db: Session,
+    department_id: int
+):
+    department = department_crud.get_department_by_id(db, department_id)
+
+    if not department:
+        raise HTTPException(status_code=404, detail="Department not found")
+    
+    return department
     
 # 受診記録が存在するか確認するヘルパー関数
 def _get_visit_or_404(
@@ -77,6 +90,8 @@ def create_visit_service(
 ):
     _get_child_or_404(db, child_id, user_id)
     _get_hospital_or_404(db, visit_in.hospital_id, user_id)
+    _get_department_or_404(db, visit_in.department_id)
+
     # DB保存処理をcrudへ委譲
     return to_visit_response(visit_crud.create_visit(db, child_id, visit_in))
 
@@ -94,6 +109,10 @@ def update_visit_service(
     if visit_in.hospital_id is not None:
         _get_hospital_or_404(db, visit_in.hospital_id, user_id)
 
+    # department_idの整合性チェック
+    if visit_in.department_id is not None:
+        _get_department_or_404(db, visit_in.department_id)
+        
     # DB保存処理をcrudへ委譲
     updated = visit_crud.update_visit(db, visit, visit_in)
     return to_visit_response(updated)
