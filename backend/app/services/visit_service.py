@@ -6,6 +6,7 @@ from app.crud import hospital as hospital_crud
 from app.crud import department as department_crud
 from app.schemas.visit import VisitCreate, VisitKey, VisitUpdate, VisitResponse
 from app.crud import child as child_crud
+from app.core.local_storage import delete_storage_file, delete_visit_upload_dir
 
 # こどもIDが存在するか確認するヘルパー関数
 def _get_child_or_404(
@@ -123,11 +124,19 @@ def delete_visit_service(
     key: VisitKey,
     user_id: int
 ):
-    # DBから対象のこどもの受診記録を探す
+    # ①DBから対象のこどもの受診記録を探す
     visit = _get_visit_or_404(db, key, user_id)
-    
-    # DB削除処理をcrudに委譲
-    visit_crud.delete_visit(db, visit)
+    visit_id = visit.id
+
+    # ②関連データ込みで削除しファイルパスを受け取る
+    storage_keys = visit_crud.delete_visit(db, visit)
+
+    # ③ローカルの画像ファイル削除
+    for storage_key in storage_keys:
+        delete_storage_file(storage_key)
+
+    # ④受診ごとの保存フォルダを削除
+    delete_visit_upload_dir(visit_id)
 
 # visitからdisease_namesをつくる関数
 def build_disease_names(visit: Visit) -> list[str]:
