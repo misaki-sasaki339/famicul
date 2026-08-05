@@ -1,9 +1,5 @@
 from fastapi import FastAPI
-from app.routers import auth
-from app.routers import children
-from app.routers import hospitals
-from app.routers import visits
-from app.routers import visit_image
+from app.routers import auth, children, hospitals, visits, visit_image, departments
 
 # appインスタンスを作成（サーバ本体）
 app = FastAPI()
@@ -16,14 +12,17 @@ def read_root():
 # ログイン処理の読み込み
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
 
-# /childへのアクセスの処理
+# /childrenへのアクセスの処理
 app.include_router(children.router, tags=["children"])
 
-# /hospitalへのアクセスの処理
-app.include_router(hospitals.router, tags=["hospital"])
+# /hospitalsへのアクセスの処理
+app.include_router(hospitals.router, tags=["hospitals"])
 
 # /visitsへのアクセスの処理
-app.include_router(visits.router, tags=["visit"])
+app.include_router(visits.router, tags=["visits"])
 
 # /children/{child_id}/visits/{id}/imagesへのアクセス処理
 app.include_router(visit_image.router, tags=["visit-images"])
+
+# /departmentsへのアクセス
+app.include_router(departments.router, tags=["departments"])
