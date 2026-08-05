@@ -41,3 +41,14 @@ def login(
 )
 def me(current_user: User = Depends(get_current_user)):
     return current_user
+
+# ログアウトAPI
+@router.post(
+    "/logout",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+def logout(
+    current_user: User = Depends(get_current_user),
+):
+    # JWT方式ではサーバ側で消すものがないためフロント側でトークン削除
+    return None
